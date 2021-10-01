@@ -1,14 +1,17 @@
 # B.CfnLambdaLayer
 
-An AWS CDK resource that adds additional functionality to `LayerVersion` lambda layer resource.
+Easy lambda dependency management is here!<br> This is an AWS CDK resource that acts as a
+`LayerVersion` resource but with more convenient approach to specify and bundle dependencies.
 
 ### Description
 
-TODO
-
 AWS CDK already makes it incredibly simple to package code for lambda functions and 
-layers by exposing `Code` resource and methods like `Code.from_asset()`. This custom layer resource 
-makes packaging code even more convenient. 
+layers by exposing `Code` resource and methods like `Code.from_asset()`. However, it is very
+difficult to add additional dependencies to your layer code e.g. `jose`, `requests`, newer `boto3` library, etc.
+This custom layer resource makes packaging code with dependencies extremely simple like 2 + 2! You 
+simply specify a dictionary of dependencies to include and this resource will do the rest.
+<br><br>
+You should note that this resource uses `docker` to bundle code and dependencies.
 
 ### Remarks
 
@@ -67,6 +70,22 @@ pip install b-cfn-lambda-layer
 
 ### Usage & Examples
 
+The most convenient feature of this resource is easy dependency management. When creating a new layer
+you simply supply a dictionary of dependencies, and they will be installed and packaged to you layer
+at a deployment level:
+
+```python
+from b_cfn_lambda_layer.package_version import PackageVersion
+
+dependencies = {
+    'python-jose': PackageVersion.from_string_version('3.3.0'),
+    'boto3': PackageVersion.from_string_version('1.16.35'),
+    'botocore': PackageVersion.from_string_version('1.19.35')
+}
+```
+
+This is a full example where we create a lambda layer and use it in lambda function.
+
 ```python
 from aws_cdk.aws_lambda import Function, Code, Runtime
 from aws_cdk.core import Stack
@@ -74,7 +93,22 @@ from aws_cdk.core import Stack
 from b_cfn_lambda_layer.lambda_layer import LambdaLayer
 from b_cfn_lambda_layer.package_version import PackageVersion
 
-# Create a function with layer.
+# Create layer with custom dependencies.
+layer = LambdaLayer(
+    scope=Stack(...),
+    name='TestLayer',
+    # You can conveniently specify path to source code to include.
+    source_path='/path/to/your/layer/source/code',
+    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+    # You can conveniently specify dependencies to include.
+    dependencies={
+        'python-jose': PackageVersion.from_string_version('3.3.0'),
+        'boto3': PackageVersion.from_string_version('1.16.35'),
+        'botocore': PackageVersion.from_string_version('1.19.35')
+    }
+)
+
+# Create a function with a layer.
 Function(
     scope=Stack(...),
     id='MyFunction',
@@ -82,20 +116,7 @@ Function(
     handler='index.handler',
     runtime=Runtime.PYTHON_3_6,
     # Specify layers.
-    layers=[
-        LambdaLayer(
-            scope=Stack(...),
-            name='TestLayer',
-            source_path='/path/to/your/layer/source/code',
-            code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
-            # You can conveniently specify dependencies to include.
-            dependencies={
-                'python-jose': PackageVersion.from_string_version('3.3.0'),
-                'boto3': PackageVersion.from_string_version('1.16.35'),
-                'botocore': PackageVersion.from_string_version('1.19.35')
-            }
-        )
-    ]
+    layers=[layer]
 )
 ```
 
