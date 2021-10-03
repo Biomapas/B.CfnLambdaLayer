@@ -1,5 +1,7 @@
 # B.CfnLambdaLayer
 
+![Pipeline](https://github.com/Biomapas/B.CfnLambdaLayer/workflows/Pipeline/badge.svg?branch=master)
+
 Easy lambda dependency management is here!<br> This is an AWS CDK resource that acts as a
 `LayerVersion` resource but with more convenient approach to specify and bundle dependencies.
 
