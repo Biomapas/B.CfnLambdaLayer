@@ -16,6 +16,8 @@ class LambdaLayer(LayerVersion):
     DOCKER_BUNDLING_TMP_OUTPUTS_DIR = '/tmp/lambda/outputs/'
     DOCKER_BUNDLING_ASSET_INPUTS = '/asset-input/'
     DOCKER_BUNDLING_ASSET_OUTPUTS = '/asset-output/'
+    # According to documentation, all of the code and dependencies shall live in "python" dir:
+    # https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html
     DOCKER_BUNDLING_ASSET_OUTPUTS_PYTHON = '/asset-output/python/'
 
     def __init__(
@@ -38,7 +40,9 @@ class LambdaLayer(LayerVersion):
         :param code_runtimes: Available runtimes for your code.
         :param include_source_path_directory: When bundling source code - include source code's parent directory.
             E.g. if this setting is false, bundled module is imported like this: "from a import A". However,
-            if this setting is true, bundled module is imported like this: "from parent_dir.a import A".
+            if this setting is true, bundled module is imported like this: "from parent_dir.a import A". Note,
+            that other dependencies e.g. boto3, jwt, requests, or any other will remain importable as usual
+            despite this setting e.g. "from boto3 import client".
         :param additional_pip_install_args: A string of additional pip-install arguments.
         :param dependencies: A dictionary of dependencies to include in the layer.
             Keys are dependency (package) names.
@@ -57,7 +61,12 @@ class LambdaLayer(LayerVersion):
         self.__docker_bundling_tmp_outputs_dir = self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR
         self.__docker_bundling_asset_inputs = self.DOCKER_BUNDLING_ASSET_INPUTS
         self.__docker_bundling_asset_outputs = self.DOCKER_BUNDLING_ASSET_OUTPUTS
-        self.__docker_bundling_asset_outputs_python = self.DOCKER_BUNDLING_ASSET_OUTPUTS_PYTHON
+        # Output directory for dependencies. Usually it should always be /asset-output/python/.
+        self.__docker_bundling_asset_outputs_python_dependencies = self.DOCKER_BUNDLING_ASSET_OUTPUTS_PYTHON
+        # Output directory for custom code. Usually it is /asset-output/python/ but if
+        # "include_source_path_directory" setting is set to true then it will be something
+        # like this - /asset-output/python/parent-dir/.
+        self.__docker_bundling_asset_outputs_python_code = self.DOCKER_BUNDLING_ASSET_OUTPUTS_PYTHON
 
         # If it was specified to include "source path parent directory" when bundling source code,
         # modify the final asset outputs python path to include that "source path parent directory".
@@ -65,8 +74,8 @@ class LambdaLayer(LayerVersion):
         # "from a import A".
         if include_source_path_directory:
             source_directory_base_name = os.path.basename(self.__source_path)
-            self.__docker_bundling_asset_outputs_python = (
-                f'{self.__docker_bundling_asset_outputs_python}'
+            self.__docker_bundling_asset_outputs_python_code = (
+                f'{self.__docker_bundling_asset_outputs_python_code}'
                 f'{source_directory_base_name}/'
             )
 
@@ -170,18 +179,18 @@ class LambdaLayer(LayerVersion):
 
     def pre_build_command(self) -> List[str]:
         return [
-            # According to documentation, all of the code and dependencies shall live in "python" dir:
-            # https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html
-            f'mkdir -p {self.__docker_bundling_asset_outputs_python}'
+            # Make sure these output directories exist.
+            f'mkdir -p {self.__docker_bundling_asset_outputs_python_code}',
+            f'mkdir -p {self.__docker_bundling_asset_outputs_python_dependencies}',
         ]
 
     def build_command(self) -> List[str]:
         return [
             # Copy installed dependencies.
-            f'cp -R {self.__docker_bundling_tmp_outputs_dir}. {self.__docker_bundling_asset_outputs_python}.',
+            f'cp -R {self.__docker_bundling_tmp_outputs_dir}. {self.__docker_bundling_asset_outputs_python_dependencies}.',
 
             # Copy source code.
-            f'cp -R {self.__docker_bundling_asset_inputs}. {self.__docker_bundling_asset_outputs_python}.',
+            f'cp -R {self.__docker_bundling_asset_inputs}. {self.__docker_bundling_asset_outputs_python_code}.',
         ]
 
     def post_build_command(self) -> List[str]:
@@ -196,8 +205,10 @@ class LambdaLayer(LayerVersion):
             f'rm -rf {self.__docker_bundling_tmp_outputs_dir}',
 
             # List asset-output contents.
-            f'echo "---------------------------- {self.__docker_bundling_asset_outputs_python} ----------------------------"',
-            f'ls -la {self.__docker_bundling_asset_outputs_python}.',
+            f'echo "---------------------------- {self.__docker_bundling_asset_outputs_python_code} ----------------------------"',
+            f'ls -la {self.__docker_bundling_asset_outputs_python_code}.',
+            f'echo "---------------------------- {self.__docker_bundling_asset_outputs_python_dependencies} ----------------------------"',
+            f'ls -la {self.__docker_bundling_asset_outputs_python_dependencies}.',
 
             # Calculate asset-output hash.
             f'echo "---------------------------- {self.__docker_bundling_asset_outputs} hash ----------------------------"',

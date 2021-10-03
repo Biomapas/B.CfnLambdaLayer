@@ -1,5 +1,8 @@
 # Release history
 
+### 1.1.1
+* Small bug fix to include parent directory only for source code.
+
 ### 1.1.0
 * Add ability to include parent directory when bundling.
 
