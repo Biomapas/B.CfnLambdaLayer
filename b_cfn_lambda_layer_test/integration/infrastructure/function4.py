@@ -6,17 +6,19 @@ from b_cfn_lambda_layer.lambda_layer import LambdaLayer
 from b_cfn_lambda_layer_test.integration.infrastructure.layer_source import root
 
 
-class Function1(Function):
+class Function4(Function):
     """
-    Function that allows us to test whether layer source code is included.
+    Function that allows us to test whether layer source code is included in the parent directory
+    i.e. instead of "from a import A" you would get "from parent_dir.a import A".
     """
     def __init__(self, scope: Stack):
         super().__init__(
             scope=scope,
-            id=f'{TestingStack.global_prefix()}TestingFunction1',
+            id=f'{TestingStack.global_prefix()}TestingFunction4',
             code=Code.from_inline(
-                # Ensure that dummy module is accessible from lambda layer.
-                'from dummy_module import DummyModule\n'
+                # Ensure that dummy module is accessible from lambda layer
+                # and the parent directory is included.
+                'from layer_source.dummy_module import DummyModule\n'
                 '\n\n'
                 'def handler(*args, **kwargs):\n'
                 '    return dict(\n'
@@ -30,10 +32,10 @@ class Function1(Function):
             layers=[
                 LambdaLayer(
                     scope=scope,
-                    name=f'{TestingStack.global_prefix()}TestingLayer1',
+                    name=f'{TestingStack.global_prefix()}TestingLayer4',
                     source_path=root,
                     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
-                    include_source_path_directory=False
+                    include_source_path_directory=True
                 )
             ]
         )

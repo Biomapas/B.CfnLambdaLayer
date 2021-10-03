@@ -8,6 +8,9 @@ from b_cfn_lambda_layer_test.integration.infrastructure.layer_source import root
 
 
 class Function2(Function):
+    """
+    Function that allows us to test whether installing dependencies works.
+    """
     def __init__(self, scope: Stack):
         super().__init__(
             scope=scope,
@@ -40,7 +43,8 @@ class Function2(Function):
                         'python-jose': PackageVersion.from_string_version('3.3.0'),
                         'boto3': PackageVersion.from_string_version('1.16.35'),
                         'botocore': PackageVersion.from_string_version('1.19.35')
-                    }
+                    },
+                    include_source_path_directory=False
                 )
             ]
         )

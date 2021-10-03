@@ -7,6 +7,10 @@ from b_cfn_lambda_layer_test.integration.infrastructure.layer_source_2 import ro
 
 
 class Function3(Function):
+    """
+    Function that allows us to test whether installing dependencies
+    via requirements.txt works.
+    """
     def __init__(self, scope: Stack):
         super().__init__(
             scope=scope,
@@ -36,6 +40,7 @@ class Function3(Function):
                     name=f'{TestingStack.global_prefix()}TestingLayer3',
                     source_path=root,
                     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+                    include_source_path_directory=False
                 )
             ]
         )

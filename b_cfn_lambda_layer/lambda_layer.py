@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import List, Optional, Dict
 
 from aws_cdk.aws_lambda import Code
@@ -23,6 +24,7 @@ class LambdaLayer(LayerVersion):
             name: str,
             source_path: str,
             code_runtimes: List[Runtime],
+            include_source_path_directory: bool = True,
             additional_pip_install_args: Optional[str] = None,
             dependencies: Optional[Dict[str, PackageVersion]] = None,
             docker_image: Optional[DockerImage] = None,
@@ -34,16 +36,39 @@ class LambdaLayer(LayerVersion):
         :param name: Unique name of the layer.
         :param source_path: Path to source-code to be bundled.
         :param code_runtimes: Available runtimes for your code.
+        :param include_source_path_directory: When bundling source code - include source code's parent directory.
+            E.g. if this setting is false, bundled module is imported like this: "from a import A". However,
+            if this setting is true, bundled module is imported like this: "from parent_dir.a import A".
+        :param additional_pip_install_args: A string of additional pip-install arguments.
         :param dependencies: A dictionary of dependencies to include in the layer.
             Keys are dependency (package) names.
             Values are dependency (package) version objects.
         :param docker_image: Docker image to use when building code.
         """
+        self.__scope = scope
+        self.__name = name
         self.__source_path = source_path
         self.__runtimes = code_runtimes
+        self.__include_source_path_directory = include_source_path_directory
         self.__additional_pip_install_args = additional_pip_install_args
         self.__dependencies = dependencies or {}
         self.__docker_image = docker_image
+
+        self.__docker_bundling_tmp_outputs_dir = self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR
+        self.__docker_bundling_asset_inputs = self.DOCKER_BUNDLING_ASSET_INPUTS
+        self.__docker_bundling_asset_outputs = self.DOCKER_BUNDLING_ASSET_OUTPUTS
+        self.__docker_bundling_asset_outputs_python = self.DOCKER_BUNDLING_ASSET_OUTPUTS_PYTHON
+
+        # If it was specified to include "source path parent directory" when bundling source code,
+        # modify the final asset outputs python path to include that "source path parent directory".
+        # This means, that bundled module will be imported as "from parent_dir.a import A" instead of
+        # "from a import A".
+        if include_source_path_directory:
+            source_directory_base_name = os.path.basename(self.__source_path)
+            self.__docker_bundling_asset_outputs_python = (
+                f'{self.__docker_bundling_asset_outputs_python}'
+                f'{source_directory_base_name}/'
+            )
 
         super().__init__(
             scope=scope,
@@ -102,17 +127,17 @@ class LambdaLayer(LayerVersion):
             #
             # Read more documentation:
             # https://aws.amazon.com/blogs/devops/building-apps-with-aws-cdk/
-            f'if [ ! -d {self.DOCKER_BUNDLING_ASSET_INPUTS} ]; then echo "Directory {self.DOCKER_BUNDLING_ASSET_INPUTS} not present!" && exit 1; fi',
-            f'if [ ! -d {self.DOCKER_BUNDLING_ASSET_OUTPUTS} ]; then echo "Directory {self.DOCKER_BUNDLING_ASSET_OUTPUTS} not present!" && exit 1; fi',
+            f'if [ ! -d {self.__docker_bundling_asset_inputs} ]; then echo "Directory {self.__docker_bundling_asset_inputs} not present!" && exit 1; fi',
+            f'if [ ! -d {self.__docker_bundling_asset_outputs} ]; then echo "Directory {self.__docker_bundling_asset_outputs} not present!" && exit 1; fi',
 
             # Make temporary directory.
-            f'mkdir -p {self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR}',
+            f'mkdir -p {self.__docker_bundling_tmp_outputs_dir}',
 
             # List all insides of asset-input and tmp directories.
-            f'echo "---------------------------- {self.DOCKER_BUNDLING_ASSET_INPUTS} ----------------------------"',
-            f'ls -la {self.DOCKER_BUNDLING_ASSET_INPUTS}',
-            f'echo "---------------------------- {self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR} ----------------------------"',
-            f'ls -la {self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR}',
+            f'echo "---------------------------- {self.__docker_bundling_asset_inputs} ----------------------------"',
+            f'ls -la {self.__docker_bundling_asset_inputs}',
+            f'echo "---------------------------- {self.__docker_bundling_tmp_outputs_dir} ----------------------------"',
+            f'ls -la {self.__docker_bundling_tmp_outputs_dir}',
         ]
 
     def install_command(self, pip_install_args: Optional[str] = None) -> List[str]:
@@ -120,9 +145,9 @@ class LambdaLayer(LayerVersion):
 
         command = [
             # Try to find requirements file. If it exists run install.
-            f'if [ -e {self.DOCKER_BUNDLING_ASSET_INPUTS}requirements.txt ]; '
+            f'if [ -e {self.__docker_bundling_asset_inputs}requirements.txt ]; '
             f'then '
-            f'pip install -r {self.DOCKER_BUNDLING_ASSET_INPUTS}requirements.txt {pip_install_args} -t {self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR}; '
+            f'pip install -r {self.__docker_bundling_asset_inputs}requirements.txt {pip_install_args} -t {self.__docker_bundling_tmp_outputs_dir}; '
             f'fi'
         ]
 
@@ -139,44 +164,44 @@ class LambdaLayer(LayerVersion):
     def post_install_command(self) -> List[str]:
         return [
             # Just for debugging reasons list what's inside after installation.
-            f'echo "---------------------------- {self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR} ----------------------------"',
-            f'ls -la {self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR}'
+            f'echo "---------------------------- {self.__docker_bundling_tmp_outputs_dir} ----------------------------"',
+            f'ls -la {self.__docker_bundling_tmp_outputs_dir}'
         ]
 
     def pre_build_command(self) -> List[str]:
         return [
             # According to documentation, all of the code and dependencies shall live in "python" dir:
             # https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html
-            f'mkdir -p {self.DOCKER_BUNDLING_ASSET_OUTPUTS_PYTHON}'
+            f'mkdir -p {self.__docker_bundling_asset_outputs_python}'
         ]
 
     def build_command(self) -> List[str]:
         return [
             # Copy installed dependencies.
-            f'cp -R {self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR}. {self.DOCKER_BUNDLING_ASSET_OUTPUTS_PYTHON}.',
+            f'cp -R {self.__docker_bundling_tmp_outputs_dir}. {self.__docker_bundling_asset_outputs_python}.',
 
             # Copy source code.
-            f'cp -R {self.DOCKER_BUNDLING_ASSET_INPUTS}. {self.DOCKER_BUNDLING_ASSET_OUTPUTS_PYTHON}.',
+            f'cp -R {self.__docker_bundling_asset_inputs}. {self.__docker_bundling_asset_outputs_python}.',
         ]
 
     def post_build_command(self) -> List[str]:
         return [
             # Cleanup.
-            f'find  {self.DOCKER_BUNDLING_ASSET_OUTPUTS} -type f -name "*.py[co]" -delete',
-            f'find  {self.DOCKER_BUNDLING_ASSET_OUTPUTS} -type d -name "__pycache__" -exec rm -rf {{}} +',
-            f'find  {self.DOCKER_BUNDLING_ASSET_OUTPUTS} -type d -name "*.dist-info" -exec rm -rf {{}} +',
-            f'find  {self.DOCKER_BUNDLING_ASSET_OUTPUTS} -type d -name "*.egg-info" -exec rm -rf {{}} +',
+            f'find  {self.__docker_bundling_asset_outputs} -type f -name "*.py[co]" -delete',
+            f'find  {self.__docker_bundling_asset_outputs} -type d -name "__pycache__" -exec rm -rf {{}} +',
+            f'find  {self.__docker_bundling_asset_outputs} -type d -name "*.dist-info" -exec rm -rf {{}} +',
+            f'find  {self.__docker_bundling_asset_outputs} -type d -name "*.egg-info" -exec rm -rf {{}} +',
 
             # Clean tmp directory for reuse.
-            f'rm -rf {self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR}',
+            f'rm -rf {self.__docker_bundling_tmp_outputs_dir}',
 
             # List asset-output contents.
-            f'echo "---------------------------- {self.DOCKER_BUNDLING_ASSET_OUTPUTS_PYTHON} ----------------------------"',
-            f'ls -la {self.DOCKER_BUNDLING_ASSET_OUTPUTS_PYTHON}.',
+            f'echo "---------------------------- {self.__docker_bundling_asset_outputs_python} ----------------------------"',
+            f'ls -la {self.__docker_bundling_asset_outputs_python}.',
 
             # Calculate asset-output hash.
-            f'echo "---------------------------- {self.DOCKER_BUNDLING_ASSET_OUTPUTS} hash ----------------------------"',
-            f'find {self.DOCKER_BUNDLING_ASSET_OUTPUTS} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum',
+            f'echo "---------------------------- {self.__docker_bundling_asset_outputs} hash ----------------------------"',
+            f'find {self.__docker_bundling_asset_outputs} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum',
 
             # Success!
             'echo "\n---------------- build successful ----------------\n"',
@@ -208,13 +233,13 @@ class LambdaLayer(LayerVersion):
             install_args += f' {LambdaLayer.__pip_upgrade_args()}'
             return (
                 f'pip install {dependency} {install_args} '
-                f'-t {self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR}'
+                f'-t {self.__docker_bundling_tmp_outputs_dir}'
             )
 
         elif version.version_type == PackageVersion.VersionType.SPECIFIC:
             return (
                 f'pip install {dependency}=={version.version_string} {install_args} '
-                f'-t {self.DOCKER_BUNDLING_TMP_OUTPUTS_DIR}'
+                f'-t {self.__docker_bundling_tmp_outputs_dir}'
             )
 
         elif version.version_type == PackageVersion.VersionType.NONE:
