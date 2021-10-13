@@ -1,5 +1,8 @@
 # Release history
 
+### 1.1.3
+* Retain dist-utils when bundling layer.
+
 ### 1.1.1
 * Small bug fix to include parent directory only for source code.
 

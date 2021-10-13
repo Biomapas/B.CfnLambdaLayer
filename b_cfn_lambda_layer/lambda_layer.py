@@ -198,7 +198,6 @@ class LambdaLayer(LayerVersion):
             # Cleanup.
             f'find  {self.__docker_bundling_asset_outputs} -type f -name "*.py[co]" -delete',
             f'find  {self.__docker_bundling_asset_outputs} -type d -name "__pycache__" -exec rm -rf {{}} +',
-            f'find  {self.__docker_bundling_asset_outputs} -type d -name "*.dist-info" -exec rm -rf {{}} +',
             f'find  {self.__docker_bundling_asset_outputs} -type d -name "*.egg-info" -exec rm -rf {{}} +',
 
             # Clean tmp directory for reuse.
