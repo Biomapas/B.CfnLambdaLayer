@@ -14,9 +14,10 @@ class Function1(Function):
     def __init__(self, scope: Stack):
         super().__init__(
             scope=scope,
-            id=f'{TestingStack.global_prefix()}TestingFunction2',
+            id=f'{TestingStack.global_prefix()}TestingFunction1',
             code=Code.from_inline(
                 'import urllib3\n'
+                'import jose\n'
                 'from jose import jwk, jwt\n'
                 'from jose.utils import base64url_decode\n'
                 'import boto3\n'
@@ -27,6 +28,7 @@ class Function1(Function):
                 '    return dict(\n'
                 '        Boto3Version=boto3.__version__,\n'
                 '        BotocoreVersion=botocore.__version__,\n'
+                '        JoseVersion=jose.__version__,\n'
                 '        Dummy=DummyModule.action()\n'
                 '    )'
                 '\n'
@@ -36,7 +38,7 @@ class Function1(Function):
             layers=[
                 LambdaLayer(
                     scope=scope,
-                    layer_name=f'{TestingStack.global_prefix()}TestingLayer2',
+                    layer_name=f'{TestingStack.global_prefix()}TestingLayer1',
                     source_path=root,
                     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                     dependencies={

@@ -14,7 +14,7 @@ class Function2(Function):
     def __init__(self, scope: Stack):
         super().__init__(
             scope=scope,
-            id=f'{TestingStack.global_prefix()}TestingFunction4',
+            id=f'{TestingStack.global_prefix()}TestingFunction2',
             code=Code.from_inline(
                 # Ensure that dummy module is accessible from lambda layer
                 # and the parent directory is included.
@@ -32,7 +32,7 @@ class Function2(Function):
             layers=[
                 LambdaLayer(
                     scope=scope,
-                    layer_name=f'{TestingStack.global_prefix()}TestingLayer4',
+                    layer_name=f'{TestingStack.global_prefix()}TestingLayer2',
                     source_path=root,
                     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                 )
