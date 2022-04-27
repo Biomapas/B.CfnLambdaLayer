@@ -1,4 +1,0 @@
-python-jose==3.3.0
-boto3==1.16.35
-botocore==1.19.35
-Faker==8.14.0

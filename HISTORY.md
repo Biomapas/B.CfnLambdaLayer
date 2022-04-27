@@ -1,5 +1,11 @@
 # Release history
 
+### 2.0.0
+* Complete code refactor.
+* Change cmd line based bundling to Dockerfile based bundling.
+* Deprecated `requirements.txt` functionality. The library will no longer
+install dependencies if a `requirements.txt` file is found within source code.
+
 ### 1.1.3
 * Retain dist-utils when bundling layer.
 

@@ -24,12 +24,10 @@ setup(
         'AWS CDK based lambda layer including useful utilities.'
     ),
     long_description=README + '\n\n' + HISTORY,
-    long_description_content_type="text/markdown",
+    long_description_content_type='text/markdown',
     include_package_data=True,
     install_requires=[
-        "aws-cdk.aws_lambda>=1.54.0,<2.0.0",
-        'b-aws-testing-framework>=0.0.24,<1.0.0',
-        "boto3>=1.16.0,<2.0.0",
+        'aws-cdk.aws_lambda>=1.150.0,<2.0.0',
     ],
     author='Laimonas Sutkus',
     author_email='laimonas.sutkus@biomapas.com',

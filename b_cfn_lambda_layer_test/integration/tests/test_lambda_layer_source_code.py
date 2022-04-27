@@ -17,7 +17,7 @@ def test_RESOURCE_lambda_layer_WITH_deployed_lambda_function_EXPECT_execution_su
 
     # Invoke specific lambda function.
     response = lambda_client.invoke(
-        FunctionName=MainStack.get_output(MainStack.LAMBDA_FUNCTION_1_NAME_KEY),
+        FunctionName=MainStack.get_output(MainStack.LAMBDA_FUNCTION_2_NAME_KEY),
         InvocationType='RequestResponse'
     )
 
