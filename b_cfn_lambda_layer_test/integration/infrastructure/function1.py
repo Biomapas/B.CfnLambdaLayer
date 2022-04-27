@@ -38,7 +38,7 @@ class Function1(Function):
             layers=[
                 LambdaLayer(
                     scope=scope,
-                    layer_name=f'{TestingStack.global_prefix()}TestingLayer1',
+                    name=f'{TestingStack.global_prefix()}TestingLayer1',
                     source_path=root,
                     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                     dependencies={

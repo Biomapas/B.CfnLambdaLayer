@@ -32,7 +32,7 @@ class Function2(Function):
             layers=[
                 LambdaLayer(
                     scope=scope,
-                    layer_name=f'{TestingStack.global_prefix()}TestingLayer2',
+                    name=f'{TestingStack.global_prefix()}TestingLayer2',
                     source_path=root,
                     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                 )

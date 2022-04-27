@@ -37,13 +37,13 @@ class Function3(Function):
             layers=[
                 LambdaLayer(
                     scope=scope,
-                    layer_name=f'{TestingStack.global_prefix()}TestingLayer3_1',
+                    name=f'{TestingStack.global_prefix()}TestingLayer3_1',
                     source_path=root1,
                     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                 ),
                 LambdaLayer(
                     scope=scope,
-                    layer_name=f'{TestingStack.global_prefix()}TestingLayer3_2',
+                    name=f'{TestingStack.global_prefix()}TestingLayer3_2',
                     source_path=root2,
                     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                 ),
@@ -51,13 +51,13 @@ class Function3(Function):
                 # Repeat same layer twice.
                 LambdaLayer(
                     scope=scope,
-                    layer_name=f'{TestingStack.global_prefix()}TestingLayer3_3_1',
+                    name=f'{TestingStack.global_prefix()}TestingLayer3_3_1',
                     source_path=root3,
                     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                 ),
                 LambdaLayer(
                     scope=scope,
-                    layer_name=f'{TestingStack.global_prefix()}TestingLayer3_3_2',
+                    name=f'{TestingStack.global_prefix()}TestingLayer3_3_2',
                     source_path=root3,
                     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                 )

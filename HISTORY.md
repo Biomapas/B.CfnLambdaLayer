@@ -1,5 +1,9 @@
 # Release history
 
+### 2.0.1
+* Actually, make it compatible with previous versions 
+  (at least from the `layer_name` -> `name` perspective).
+
 ### 2.0.0
 * Complete code refactor.
 * Change cmd line based bundling to Dockerfile based bundling.

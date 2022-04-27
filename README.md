@@ -98,7 +98,7 @@ from b_cfn_lambda_layer.package_version import PackageVersion
 # Create layer with custom dependencies.
 layer = LambdaLayer(
     scope=Stack(...),
-    layer_name='TestLayer',
+    name='TestLayer',
     # You can conveniently specify path to source code to include.
     source_path='/path/to/your/layer/source/code',
     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],

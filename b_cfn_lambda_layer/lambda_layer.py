@@ -16,7 +16,7 @@ class LambdaLayer(LayerVersion):
     def __init__(
             self,
             scope: Stack,
-            layer_name: str,
+            name: str,
             source_path: str,
             code_runtimes: List[Runtime],
             dependencies: Optional[Dict[str, PackageVersion]] = None,
@@ -27,7 +27,7 @@ class LambdaLayer(LayerVersion):
         Constructor.
 
         :param scope: Parent CloudFormation stack.
-        :param layer_name: Unique name of the layer.
+        :param name: Unique name of the layer.
         :param source_path: Path to source-code to be bundled.
         :param code_runtimes: Available runtimes for your code.
         :param dependencies: A dictionary of dependencies to include in the layer.
@@ -38,8 +38,8 @@ class LambdaLayer(LayerVersion):
         """
         super().__init__(
             scope=scope,
-            id=layer_name,
-            layer_version_name=layer_name,
+            id=name,
+            layer_version_name=name,
             code=LambdaLayerCode(
                 source_path=source_path,
                 additional_pip_install_args=additional_pip_install_args,
