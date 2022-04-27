@@ -6,9 +6,9 @@ from botocore.response import StreamingBody
 from b_cfn_lambda_layer_test.integration.infrastructure.main_stack import MainStack
 
 
-def test_RESOURCE_lambda_layer_WITH_deployed_lambda_function_layer_with_parent_dir_EXPECT_execution_successful():
+def test_RESOURCE_lambda_layer_WITH_deployed_lambda_function_with_dependencies_EXPECT_execution_successful():
     """
-    Test whether the layer provides necessary functionality.
+    Test whether the layer provides necessary functionality when dependencies are supplied.
 
     :return: No return.
     """
@@ -17,7 +17,7 @@ def test_RESOURCE_lambda_layer_WITH_deployed_lambda_function_layer_with_parent_d
 
     # Invoke specific lambda function.
     response = lambda_client.invoke(
-        FunctionName=MainStack.get_output(MainStack.LAMBDA_FUNCTION_4_NAME_KEY),
+        FunctionName=MainStack.get_output(MainStack.LAMBDA_FUNCTION_1_NAME_KEY),
         InvocationType='RequestResponse'
     )
 
@@ -27,4 +27,6 @@ def test_RESOURCE_lambda_layer_WITH_deployed_lambda_function_layer_with_parent_d
     data = json.loads(''.join(data))
 
     # Assert that the result is as expected.
+    assert data.get('Boto3Version') == '1.16.35', data
+    assert data.get('BotocoreVersion') == '1.19.35', data
     assert data.get('Dummy') == 'Hello world from dummy module!', data

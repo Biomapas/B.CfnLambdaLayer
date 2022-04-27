@@ -1,12 +1,13 @@
 import os
-from os.path import exists
-from typing import Optional, Dict
+import shutil
+from typing import Optional, List
 
 from aws_cdk.aws_lambda import Code
 
 from b_cfn_lambda_layer import root
-from b_cfn_lambda_layer.package_version import PackageVersion
+from b_cfn_lambda_layer.dependency import Dependency
 from b_cfn_lambda_layer.pip_install import PipInstall
+from b_cfn_lambda_layer.tmp import docker_build_root
 
 
 class LambdaLayerCode:
@@ -15,21 +16,14 @@ class LambdaLayerCode:
     def __init__(
             self,
             source_path: str,
-            include_parent: bool = True,
             additional_pip_install_args: Optional[str] = None,
-            dependencies: Optional[Dict[str, PackageVersion]] = None,
+            dependencies: Optional[List[Dependency]] = None,
             docker_image: Optional[str] = None
     ) -> None:
         """
         Constructor.
 
         :param source_path: Path to source-code to be bundled.
-        :param include_parent: A flag to specify whether include source code parent directory.
-            Read more:
-            If it was specified to include "source path parent directory"
-            when bundling source code, the final asset outputs python path will include
-            that "source path parent directory". This means, that bundled module will be imported
-            as "from parent_dir.a import A" instead of "from a import A".
         :param additional_pip_install_args:
         :param dependencies:
         :param docker_image:
@@ -37,27 +31,19 @@ class LambdaLayerCode:
         self.additional_pip_install_args = additional_pip_install_args
         self.dependencies = dependencies
         self.source_path = source_path
-        self.include_parent = include_parent
+        self.source_path_dir_name = os.path.basename(self.source_path)
         self.docker_image = docker_image or self.DEFAULT_DOCKER_IMAGE
-        self.source_path_parent = os.path.basename(self.source_path)
 
-        """
-        Docker outputs paths.
-        """
-
-        # General outputs path.
+        # General docker outputs path.
         # According to documentation, all of the python code and python dependencies shall live in "python" dir:
         # https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html
         self.outputs_path = '/asset/python'
 
-        # Output directory for source code dependencies.
-        self.dependencies_outputs_path = self.outputs_path
-
-        # Output directory for source code.
-        self.source_outputs_path = '/asset/python'
-        if self.include_parent: self.source_outputs_path += f'/{self.source_path_parent}'
-
     def build(self) -> Code:
+        # Before building, ensure source code is available for Dockerfile.
+        self.__fresh_source_copy()
+
+        # Now, after the source code was made available. Build the code with Docker.
         return Code.from_docker_build(
             path=root,
             build_args={
@@ -65,35 +51,42 @@ class LambdaLayerCode:
                 'DOCKER_IMAGE': self.docker_image,
 
                 # OS-level paths.
-                'INPUTS_PATH': self.source_path,
+                'INPUTS_PATH': f'./tmp/{self.source_path_dir_name}',
 
                 # Docker container-level paths.
-                'DOCKER_OUTPUTS_PATH': self.outputs_path,
-                'DOCKER_DEPENDENCIES_OUTPUTS_PATH': self.dependencies_outputs_path,
-                'DOCKER_SOURCE_OUTPUTS_PATH': self.source_outputs_path,
+                'OUTPUTS_PATH': self.outputs_path,
 
                 # Prebuilt commands to install.
-                'DEPENDENCIES_PIP_INSTALL': self.dependencies_install_command(),
-                'REQUIREMENTS_PIP_INSTALL': self.requirements_install_command()
+                'PIP_INSTALL': self.__dependencies_install_command(),
             },
         )
 
-    def dependencies_install_command(self) -> str:
+    def __dependencies_install_command(self) -> str:
         return PipInstall(
             dependencies=self.dependencies,
             additional_pip_install_args=self.additional_pip_install_args,
-            output_directory=self.dependencies_outputs_path
+            output_directory=self.outputs_path
         ).build_command()
 
-    def requirements_install_command(self) -> str:
-        requirements_command = (
-            f'pip install -r '
-            f'{self.source_path}/requirements.txt '
-            f'{self.additional_pip_install_args} -t '
-            f'{self.dependencies_outputs_path}'
+    def __fresh_source_copy(self) -> None:
+        """
+        Copies given lambda layer's source code to a directory where the Dockerfile is.
+        This way a Dockerfile can access source code and build it.
+
+        :return: No return.
+        """
+        # Give a unique directory for every source.
+        docker_layer_build_dir = f'{docker_build_root}/{self.source_path_dir_name}'
+
+        # Delete previous copied source.
+        shutil.rmtree(docker_layer_build_dir, ignore_errors=True)
+
+        # Copy a fresh source.
+        shutil.copytree(
+            src=self.source_path,
+            # Duplicate parent dir so the source code could be imported as
+            # "from parent.module import Module" instead of
+            # "from module import Module".
+            dst=f'{docker_layer_build_dir}/{self.source_path_dir_name}',
+            dirs_exist_ok=True
         )
-
-        if exists(f'{self.source_path}/requirements.txt'):
-            return requirements_command
-
-        return requirements_command
