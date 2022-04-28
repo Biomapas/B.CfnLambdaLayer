@@ -2,7 +2,6 @@ import logging
 from typing import List, Optional, Dict
 
 from aws_cdk.aws_lambda import LayerVersion, Runtime
-from aws_cdk.core import DockerImage
 from aws_cdk.core import Stack
 
 from b_cfn_lambda_layer.dependency import Dependency
@@ -21,7 +20,7 @@ class LambdaLayer(LayerVersion):
             code_runtimes: List[Runtime],
             dependencies: Optional[Dict[str, PackageVersion]] = None,
             additional_pip_install_args: Optional[str] = None,
-            docker_image: Optional[DockerImage] = None,
+            docker_image: Optional[str] = None,
     ) -> None:
         """
         Constructor.
