@@ -1,5 +1,8 @@
 # Release history
 
+### 2.0.3
+* Add missing Dockerfile in MANIFEST.
+
 ### 2.0.2
 * Fix type hints.
 
