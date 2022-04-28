@@ -28,6 +28,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'aws-cdk.aws_lambda>=1.150.0,<2.0.0',
+        'aws-cdk.aws-ssm>=1.150.0,<2.0.0',
     ],
     author='Laimonas Sutkus',
     author_email='laimonas.sutkus@biomapas.com',

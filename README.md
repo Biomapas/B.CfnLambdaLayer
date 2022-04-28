@@ -72,6 +72,8 @@ pip install b-cfn-lambda-layer
 
 ### Usage & Examples
 
+#### Dependencies
+
 The most convenient feature of this resource is easy dependency management. When creating a new layer
 you simply supply a dictionary of dependencies, and they will be installed and packaged to you layer
 at a deployment level:
@@ -85,6 +87,8 @@ dependencies = {
     'botocore': PackageVersion.from_string_version('1.19.35')
 }
 ```
+
+#### Full example
 
 This is a full example where we create a lambda layer and use it in lambda function.
 
@@ -120,6 +124,45 @@ Function(
     # Specify layers.
     layers=[layer]
 )
+```
+
+#### Using layers in multiple stacks
+
+We all know that we can not really share a lambda layer instance in multiple
+stacks. If we do, the next update to the source code in the lambda layer would 
+result in a failed deployment. 
+This is because of cross-stack exports-imports. An example error  is given below:
+
+> 2022-04-28 17:29:34 [    INFO] Stack | 2/4 | 5:29:31 PM | UPDATE_ROLLBACK_IN_P | AWS::CloudFormation::Stack | Stack Export Stack:Export cannot be updated as it is in use by StackB
+
+Thankfully, this resource has solved the problem very conveniently. 
+
+```python
+# Create a stack in which the layer will be created.
+stack_a = Stack(...)
+
+# Create the layer in stack A.
+layer = LambdaLayer(
+    scope=stack_a,
+    ...
+)
+
+# Create another stack which will contain lambda functions.
+stack_b = Stack(...)
+
+# Create a lambda function in stack B.
+function = Function(
+    scope=stack_b,
+    # DO NOT supply the layer directly as it will create a direct dependency
+    # between the function and the layer. This is what causes the deployments
+    # to fail if we update layer's source code.
+    # layers=[layer]
+    ...
+)
+
+# Instead, call "add_to_function" layer's method to enable that layer for the function.
+# This method does not create a direct dependency effectively solving all of our problems.
+layer.add_to_function(function)
 ```
 
 ### Testing

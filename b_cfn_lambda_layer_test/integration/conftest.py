@@ -9,7 +9,6 @@ MANAGER = TestingManager(Credentials(), CdkToolConfig(CDK_PATH, destroy_before_p
 
 
 def pytest_sessionstart(session):
-    MANAGER.set_global_prefix()
     MANAGER.prepare_infrastructure()
 
 

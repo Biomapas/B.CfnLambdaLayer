@@ -1,5 +1,10 @@
 # Release history
 
+### 2.2.0
+* Implement an ability to reference this layer in
+  different stacks and avoid cross-stack errors.
+  **THIS IS HUGE**.
+
 ### 2.1.1
 * Even better backwards compatibility (Docker image still can be supplied as object).
 
