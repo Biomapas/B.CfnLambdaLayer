@@ -1,5 +1,8 @@
 # Release history
 
+### 2.1.1
+* Even better backwards compatibility (Docker image still can be supplied as object).
+
 ### 2.1.0
 * Improve backwards compatibility.
 

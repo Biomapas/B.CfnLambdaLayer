@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional, Dict
 
 from aws_cdk.aws_lambda import LayerVersion, Runtime
-from aws_cdk.core import Stack
+from aws_cdk.core import Stack, DockerImage
 
 from b_cfn_lambda_layer.dependency import Dependency
 from b_cfn_lambda_layer.lambda_layer_code import LambdaLayerCode
@@ -38,6 +38,10 @@ class LambdaLayer(LayerVersion):
         :param additional_pip_install_args: A string of additional pip-install arguments.
         :param docker_image: Docker image to use when building code.
         """
+        # For better backwards compatibility.
+        if isinstance(docker_image, DockerImage):
+            docker_image = docker_image.image
+
         super().__init__(
             scope=scope,
             id=name,
