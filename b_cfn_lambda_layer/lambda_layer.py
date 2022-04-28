@@ -21,6 +21,9 @@ class LambdaLayer(LayerVersion):
             dependencies: Optional[Dict[str, PackageVersion]] = None,
             additional_pip_install_args: Optional[str] = None,
             docker_image: Optional[str] = None,
+            # Better backwards compatibility.
+            *args,
+            **kwargs
     ) -> None:
         """
         Constructor.
@@ -47,3 +50,9 @@ class LambdaLayer(LayerVersion):
             ).build(),
             compatible_runtimes=code_runtimes
         )
+
+        for argument in args:
+            LOGGER.warning(f'Positional argument: ({argument}) is not supported!')
+
+        for name, argument in kwargs.items():
+            LOGGER.warning(f'Named argument: ({name}:{argument}) is not supported!')

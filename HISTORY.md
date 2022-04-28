@@ -1,5 +1,8 @@
 # Release history
 
+### 2.1.0
+* Improve backwards compatibility.
+
 ### 2.0.3
 * Add missing Dockerfile in MANIFEST.
 
