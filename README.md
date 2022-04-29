@@ -137,22 +137,22 @@ This is because of cross-stack exports-imports. An example error  is given below
 
 Thankfully, this resource has solved the problem very conveniently. 
 
-```python
-# Create a stack in which the layer will be created.
-stack_a = Stack(...)
+Firstly, create a layer in any stack you want:
 
-# Create the layer in stack A.
+```python
+# Create the layer in any stack.
 layer = LambdaLayer(
-    scope=stack_a,
+    scope=Stack(...),
     ...
 )
+```
 
-# Create another stack which will contain lambda functions.
-stack_b = Stack(...)
+Then add it to a lambda function:
 
-# Create a lambda function in stack B.
+```python
+# Create a lambda function in any stack.
 function = Function(
-    scope=stack_b,
+    scope=Stack(...),
     # DO NOT supply the layer directly as it will create a direct dependency
     # between the function and the layer. This is what causes the deployments
     # to fail if we update layer's source code.
@@ -161,7 +161,7 @@ function = Function(
 )
 
 # Instead, call "add_to_function" layer's method to enable that layer for the function.
-# This method does not create a direct dependency effectively solving all of our problems.
+# This method does not create a direct dependency effectively solving cross-stack problems.
 layer.add_to_function(function)
 ```
 

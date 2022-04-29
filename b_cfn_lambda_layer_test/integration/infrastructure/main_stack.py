@@ -25,5 +25,5 @@ class MainStack(TestingStack):
         self.add_output(self.LAMBDA_FUNCTION_1_NAME_KEY, value=self.function1.function_name)
         self.add_output(self.LAMBDA_FUNCTION_2_NAME_KEY, value=self.function2.function_name)
         self.add_output(self.LAMBDA_FUNCTION_3_NAME_KEY, value=self.function3.function_name)
-        self.add_output(self.LAMBDA_FUNCTION_4_NAME_KEY, value=cross_stack.function.function_name)
+        self.add_output(self.LAMBDA_FUNCTION_4_NAME_KEY, value=cross_stack.function1.function_name)
 

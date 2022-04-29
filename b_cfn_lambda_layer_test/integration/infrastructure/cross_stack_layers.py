@@ -20,7 +20,12 @@ class CrossStackLayers(Stack):
             id='StackB'
         )
 
-        # Create a layer in stack A, reference in function in stack B.
+        stack_c = Stack(
+            scope=self,
+            id='StackC'
+        )
+
+        # Create a layer in stack A, reference in functions in stack B.
         layer_in_stack_a = LambdaLayer(
             scope=stack_a,
             name=f'{TestingStack.global_prefix()}Layer1',
@@ -28,9 +33,40 @@ class CrossStackLayers(Stack):
             code_runtimes=[Runtime.PYTHON_3_6],
         )
 
-        self.function = Function(
+        self.function1 = Function(
             scope=stack_b,
-            id='FunctionInStackB',
+            id='FunctionInStackB1',
+            handler='index.handler',
+            runtime=Runtime.PYTHON_3_6,
+            code=Code.from_inline(
+                'from layer_cross_stack.dummy_module import DummyModule\n'
+                'def handler(*args, **kwargs):\n'
+                '    return dict(\n'
+                '        Dummy=DummyModule.action()\n'
+                '    )'
+                '\n'
+            )
+        )
+
+        self.function2 = Function(
+            scope=stack_b,
+            id='FunctionInStackB2',
+            handler='index.handler',
+            runtime=Runtime.PYTHON_3_6,
+            code=Code.from_inline(
+                'from layer_cross_stack.dummy_module import DummyModule\n'
+                'def handler(*args, **kwargs):\n'
+                '    return dict(\n'
+                '        Dummy=DummyModule.action()\n'
+                '    )'
+                '\n'
+            )
+        )
+
+        # Reference layer in stack C.
+        self.function3 = Function(
+            scope=stack_c,
+            id='FunctionInStackC',
             handler='index.handler',
             runtime=Runtime.PYTHON_3_6,
             code=Code.from_inline(
@@ -44,4 +80,5 @@ class CrossStackLayers(Stack):
         )
 
         # Safe way to add layers to functions in different stacks.
-        layer_in_stack_a.add_to_function(self.function)
+        layer_in_stack_a.add_to_function(self.function1)
+        layer_in_stack_a.add_to_function(self.function2, self.function3)

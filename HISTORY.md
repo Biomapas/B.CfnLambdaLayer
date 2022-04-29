@@ -1,5 +1,9 @@
 # Release history
 
+### 2.3.0
+* Allow to add a list of lambda functions.
+* Fix bug "Given ID already exists in stack...".
+
 ### 2.2.0
 * Implement an ability to reference this layer in
   different stacks and avoid cross-stack errors.

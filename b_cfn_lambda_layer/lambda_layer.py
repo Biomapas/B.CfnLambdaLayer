@@ -1,7 +1,8 @@
 import logging
+from functools import lru_cache
 from typing import List, Optional, Dict
 
-from aws_cdk.aws_lambda import LayerVersion, Runtime, Function
+from aws_cdk.aws_lambda import LayerVersion, Runtime, Function, ILayerVersion
 from aws_cdk.aws_ssm import StringParameter
 from aws_cdk.core import Stack, DockerImage
 
@@ -72,9 +73,28 @@ class LambdaLayer(LayerVersion):
             string_value=self.layer_version_arn
         )
 
-    def add_to_function(self, function: Function) -> None:
+    @lru_cache(maxsize=None)
+    def copy(self, scope: Stack) -> ILayerVersion:
         """
-        Adds this layer to a given lambda function. Use this method if you
+        Creates a copy of a current layer that does not create a direct
+        dependency between current layer instance and the resource that is using this layer.
+
+        :param scope: A scope/stack in which this resource should be created. Note,
+            that the scope should be the same as the resource's that is using the layer copy.
+        :return: An indirect copy of this layer's instance.
+        """
+        return LayerVersion.from_layer_version_arn(
+            scope=scope,
+            id=f'{self.__name}Resolved',
+            layer_version_arn=StringParameter.value_for_string_parameter(
+                scope=scope,
+                parameter_name=f'{self.__name}Arn'
+            )
+        )
+
+    def add_to_function(self, *functions: Function) -> None:
+        """
+        Adds this layer to a given lambda function(s). Use this method if you
         want to use layers between multiple stacks and avoid breaking everything.
 
         Using this method does not create a direct dependency between the function and the layer.
@@ -82,21 +102,15 @@ class LambdaLayer(LayerVersion):
         Read more why cross-stack dependencies between functions and layers are evil:
         https://gnomezgrave.com/2020/06/04/update-cross-stack-aws-lambda-layers/
 
-        :param function: Lambda function to which this layer should be added.
+        :param functions: Lambda function(s) to which this layer should be added.
 
         :return: No return.
         """
-        # Add a dependency to the SSM parameter which has a dependency to the layer.
-        # This creates an indirect dependency between the function and the layer.
-        function.node.add_dependency(self.__ssm_arn)
-
-        layer = LayerVersion.from_layer_version_arn(
-            scope=function.stack,
-            id=f'{self.__name}Resolved',
-            layer_version_arn=StringParameter.value_for_string_parameter(
-                scope=function.stack,
-                parameter_name=f'{self.__name}Arn'
-            )
-        )
-
-        function.add_layers(layer)
+        for function in functions:
+            # Add a dependency to the SSM parameter which has a dependency to the layer.
+            # This creates an indirect dependency between the function and the layer.
+            function.node.add_dependency(self.__ssm_arn)
+            # Create the layer copy withing the same stack as the function.
+            # I am not exactly sure why, but this makes everything to magically work.
+            layer = self.copy(function.stack)
+            function.add_layers(layer)
