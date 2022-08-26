@@ -2,6 +2,7 @@ include VERSION
 include LICENSE
 include README.md
 include HISTORY.md
+include b_cfn_lambda_layer/Dockerfile
+include b_cfn_lambda_layer/dockerignore/.dockerignore
 
 recursive-include b_cfn_lambda_layer *.py
-recursive-include b_cfn_lambda_layer Dockerfile

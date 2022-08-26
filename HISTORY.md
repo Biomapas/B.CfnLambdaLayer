@@ -1,5 +1,8 @@
 # Release history
 
+### 2.4.1
+* Fix package manifest.
+
 ### 2.4.0
 * Now you no longer need to specify a path to source code. You can have
   an absolutely empty layer if you desire so.
