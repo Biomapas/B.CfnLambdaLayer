@@ -15,7 +15,7 @@ class LambdaLayerCode:
 
     def __init__(
             self,
-            source_path: str,
+            source_path: Optional[str] = None,
             additional_pip_install_args: Optional[str] = None,
             dependencies: Optional[List[Dependency]] = None,
             docker_image: Optional[str] = None
@@ -24,13 +24,16 @@ class LambdaLayerCode:
         Constructor.
 
         :param source_path: Path to source-code to be bundled.
-        :param additional_pip_install_args:
-        :param dependencies:
-        :param docker_image:
+            If None - no source code is included in the layer.
+        :param additional_pip_install_args: Additional flags and arguments to
+            include while installing python dependencies.
+        :param dependencies: A list of dependency objects to be installed in the lambda layer.
+        :param docker_image: A docker image to be used to build lambda layer.
         """
         self.additional_pip_install_args = additional_pip_install_args
         self.dependencies = dependencies
-        self.source_path = source_path
+        # If no source code is specified, a dummy .dockerignore file is copied.
+        self.source_path = source_path or f'{root}/dockerignore'
         self.source_path_dir_name = os.path.basename(self.source_path)
         self.docker_image = docker_image or self.DEFAULT_DOCKER_IMAGE
 

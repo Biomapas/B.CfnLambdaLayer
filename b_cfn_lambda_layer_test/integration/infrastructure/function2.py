@@ -28,13 +28,13 @@ class Function2(Function):
                 '\n'
             ),
             handler='index.handler',
-            runtime=Runtime.PYTHON_3_6,
+            runtime=Runtime.PYTHON_3_7,
             layers=[
                 LambdaLayer(
                     scope=scope,
                     name=f'{TestingStack.global_prefix()}TestingLayer2',
                     source_path=root,
-                    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+                    code_runtimes=[Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                 )
             ]
         )

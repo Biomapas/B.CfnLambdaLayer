@@ -104,6 +104,8 @@ layer = LambdaLayer(
     scope=Stack(...),
     name='TestLayer',
     # You can conveniently specify path to source code to include.
+    # Or not specify it at all if you care only about dependencies.
+    # source_path=None,
     source_path='/path/to/your/layer/source/code',
     code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
     # You can conveniently specify dependencies to include.

@@ -1,5 +1,9 @@
 # Release history
 
+### 2.4.0
+* Now you no longer need to specify a path to source code. You can have
+  an absolutely empty layer if you desire so.
+
 ### 2.3.0
 * Allow to add a list of lambda functions.
 * Fix bug "Given ID already exists in stack...".

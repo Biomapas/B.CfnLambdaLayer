@@ -33,20 +33,20 @@ class Function3(Function):
                 '\n'
             ),
             handler='index.handler',
-            runtime=Runtime.PYTHON_3_6,
+            runtime=Runtime.PYTHON_3_7,
             layers=[
                 LambdaLayer(
                     scope=scope,
                     name=f'{TestingStack.global_prefix()}TestingLayer3_1',
                     source_path=root1,
-                    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+                    code_runtimes=[Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                     docker_image='python:3.8'
                 ),
                 LambdaLayer(
                     scope=scope,
                     name=f'{TestingStack.global_prefix()}TestingLayer3_2',
                     source_path=root2,
-                    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+                    code_runtimes=[Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                     # Test backwards compatibility.
                     docker_image=DockerImage('python:3.8')
                 ),
@@ -56,13 +56,13 @@ class Function3(Function):
                     scope=scope,
                     name=f'{TestingStack.global_prefix()}TestingLayer3_3_1',
                     source_path=root3,
-                    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+                    code_runtimes=[Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                 ),
                 LambdaLayer(
                     scope=scope,
                     name=f'{TestingStack.global_prefix()}TestingLayer3_3_2',
                     source_path=root3,
-                    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+                    code_runtimes=[Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
                 )
             ]
         )

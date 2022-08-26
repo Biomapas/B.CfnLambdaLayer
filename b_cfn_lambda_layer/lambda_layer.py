@@ -18,8 +18,8 @@ class LambdaLayer(LayerVersion):
             self,
             scope: Stack,
             name: str,
-            source_path: str,
-            code_runtimes: List[Runtime],
+            source_path: Optional[str] = None,
+            code_runtimes: Optional[List[Runtime]] = None,
             dependencies: Optional[Dict[str, PackageVersion]] = None,
             additional_pip_install_args: Optional[str] = None,
             docker_image: Optional[str] = None,
@@ -57,7 +57,12 @@ class LambdaLayer(LayerVersion):
                 dependencies=[Dependency(key, value) for key, value in (dependencies or {}).items()],
                 docker_image=docker_image
             ).build(),
-            compatible_runtimes=code_runtimes
+            compatible_runtimes=code_runtimes or [
+                Runtime.PYTHON_3_6,
+                Runtime.PYTHON_3_7,
+                Runtime.PYTHON_3_8,
+                Runtime.PYTHON_3_9
+            ]
         )
 
         for argument in args:

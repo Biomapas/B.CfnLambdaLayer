@@ -30,14 +30,14 @@ class CrossStackLayers(Stack):
             scope=stack_a,
             name=f'{TestingStack.global_prefix()}Layer1',
             source_path=root,
-            code_runtimes=[Runtime.PYTHON_3_6],
+            code_runtimes=[Runtime.PYTHON_3_7],
         )
 
         self.function1 = Function(
             scope=stack_b,
             id='FunctionInStackB1',
             handler='index.handler',
-            runtime=Runtime.PYTHON_3_6,
+            runtime=Runtime.PYTHON_3_7,
             code=Code.from_inline(
                 'from layer_cross_stack.dummy_module import DummyModule\n'
                 'def handler(*args, **kwargs):\n'
@@ -52,7 +52,7 @@ class CrossStackLayers(Stack):
             scope=stack_b,
             id='FunctionInStackB2',
             handler='index.handler',
-            runtime=Runtime.PYTHON_3_6,
+            runtime=Runtime.PYTHON_3_7,
             code=Code.from_inline(
                 'from layer_cross_stack.dummy_module import DummyModule\n'
                 'def handler(*args, **kwargs):\n'
@@ -68,7 +68,7 @@ class CrossStackLayers(Stack):
             scope=stack_c,
             id='FunctionInStackC',
             handler='index.handler',
-            runtime=Runtime.PYTHON_3_6,
+            runtime=Runtime.PYTHON_3_7,
             code=Code.from_inline(
                 'from layer_cross_stack.dummy_module import DummyModule\n'
                 'def handler(*args, **kwargs):\n'
