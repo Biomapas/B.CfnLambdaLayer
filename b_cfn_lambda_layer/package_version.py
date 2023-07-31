@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 from enum import Enum
 from typing import Optional
 
 
 class PackageVersion:
-
     class VersionType(Enum):
-
         NONE = 'NONE'
         SPECIFIC = 'SPECIFIC'
         LATEST = 'LATEST'
@@ -23,13 +23,13 @@ class PackageVersion:
         return self.__version_type
 
     @classmethod
-    def from_string_version(cls, version_string: str) -> 'PackageVersion':
+    def from_string_version(cls, version_string: str) -> PackageVersion:
         return cls(version=version_string, version_type=cls.VersionType.SPECIFIC)
 
     @classmethod
-    def latest(cls) -> 'PackageVersion':
+    def latest(cls) -> PackageVersion:
         return cls(version_type=cls.VersionType.LATEST)
 
     @classmethod
-    def dont_install(cls) -> 'PackageVersion':
+    def dont_install(cls) -> PackageVersion:
         return cls(version_type=cls.VersionType.NONE)

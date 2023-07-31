@@ -1,5 +1,5 @@
+from aws_cdk import Stack
 from aws_cdk.aws_lambda import Function, Code, Runtime
-from aws_cdk.core import Stack
 from b_aws_testing_framework.tools.cdk_testing.testing_stack import TestingStack
 
 from b_cfn_lambda_layer.lambda_layer import LambdaLayer
@@ -11,6 +11,7 @@ class Function1(Function):
     """
     Function that allows us to test whether installing dependencies works.
     """
+
     def __init__(self, scope: Stack):
         super().__init__(
             scope=scope,
@@ -34,13 +35,13 @@ class Function1(Function):
                 '\n'
             ),
             handler='index.handler',
-            runtime=Runtime.PYTHON_3_7,
+            runtime=Runtime.PYTHON_3_10,
             layers=[
                 LambdaLayer(
                     scope=scope,
                     name=f'{TestingStack.global_prefix()}TestingLayer1',
                     source_path=root,
-                    code_runtimes=[Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+                    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8, Runtime.PYTHON_3_9, Runtime.PYTHON_3_10],
                     dependencies={
                         'python-jose': PackageVersion.from_string_version('3.3.0'),
                         'boto3': PackageVersion.from_string_version('1.16.35'),

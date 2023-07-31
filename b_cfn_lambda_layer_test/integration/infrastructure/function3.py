@@ -1,5 +1,5 @@
+from aws_cdk import Stack, DockerImage
 from aws_cdk.aws_lambda import Function, Code, Runtime
-from aws_cdk.core import Stack, DockerImage
 from b_aws_testing_framework.tools.cdk_testing.testing_stack import TestingStack
 
 from b_cfn_lambda_layer.lambda_layer import LambdaLayer
@@ -12,6 +12,7 @@ class Function3(Function):
     """
     Function that allows us to test whether multiple same layers override each other.
     """
+
     def __init__(self, scope: Stack):
         super().__init__(
             scope=scope,
@@ -33,20 +34,20 @@ class Function3(Function):
                 '\n'
             ),
             handler='index.handler',
-            runtime=Runtime.PYTHON_3_7,
+            runtime=Runtime.PYTHON_3_10,
             layers=[
                 LambdaLayer(
                     scope=scope,
                     name=f'{TestingStack.global_prefix()}TestingLayer3_1',
                     source_path=root1,
-                    code_runtimes=[Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+                    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8, Runtime.PYTHON_3_9, Runtime.PYTHON_3_10],
                     docker_image='python:3.8'
                 ),
                 LambdaLayer(
                     scope=scope,
                     name=f'{TestingStack.global_prefix()}TestingLayer3_2',
                     source_path=root2,
-                    code_runtimes=[Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+                    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8, Runtime.PYTHON_3_9, Runtime.PYTHON_3_10],
                     # Test backwards compatibility.
                     docker_image=DockerImage('python:3.8')
                 ),
@@ -56,13 +57,13 @@ class Function3(Function):
                     scope=scope,
                     name=f'{TestingStack.global_prefix()}TestingLayer3_3_1',
                     source_path=root3,
-                    code_runtimes=[Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+                    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8, Runtime.PYTHON_3_9, Runtime.PYTHON_3_10],
                 ),
                 LambdaLayer(
                     scope=scope,
                     name=f'{TestingStack.global_prefix()}TestingLayer3_3_2',
                     source_path=root3,
-                    code_runtimes=[Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+                    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8, Runtime.PYTHON_3_9, Runtime.PYTHON_3_10],
                 )
             ]
         )
