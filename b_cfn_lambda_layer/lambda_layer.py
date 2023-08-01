@@ -2,9 +2,9 @@ import logging
 from functools import lru_cache
 from typing import List, Optional, Dict
 
-from aws_cdk.aws_lambda import LayerVersion, Runtime, Function, ILayerVersion
+from aws_cdk import Stack, DockerImage
+from aws_cdk.aws_lambda import LayerVersion, Runtime, ILayerVersion, Function
 from aws_cdk.aws_ssm import StringParameter
-from aws_cdk.core import Stack, DockerImage
 
 from b_cfn_lambda_layer.dependency import Dependency
 from b_cfn_lambda_layer.lambda_layer_code import LambdaLayerCode
@@ -61,7 +61,8 @@ class LambdaLayer(LayerVersion):
                 Runtime.PYTHON_3_6,
                 Runtime.PYTHON_3_7,
                 Runtime.PYTHON_3_8,
-                Runtime.PYTHON_3_9
+                Runtime.PYTHON_3_9,
+                Runtime.PYTHON_3_10
             ]
         )
 

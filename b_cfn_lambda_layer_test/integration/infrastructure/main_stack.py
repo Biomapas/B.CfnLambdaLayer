@@ -1,5 +1,5 @@
-from aws_cdk.core import Construct
 from b_aws_testing_framework.tools.cdk_testing.testing_stack import TestingStack
+from constructs import Construct
 
 from b_cfn_lambda_layer_test.integration.infrastructure.cross_stack_layers import CrossStackLayers
 from b_cfn_lambda_layer_test.integration.infrastructure.function1 import Function1

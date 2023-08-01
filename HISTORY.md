@@ -1,5 +1,9 @@
 # Release history
 
+### 3.0.0
+* Upgrade CDK support from v1 to v2.
+* Update GitHub pipelines checkout, setup-node and setup-python versions.
+
 ### 2.4.1
 * Fix package manifest.
 

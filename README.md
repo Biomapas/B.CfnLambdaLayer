@@ -94,7 +94,7 @@ This is a full example where we create a lambda layer and use it in lambda funct
 
 ```python
 from aws_cdk.aws_lambda import Function, Code, Runtime
-from aws_cdk.core import Stack
+from aws_cdk import Stack
 
 from b_cfn_lambda_layer.lambda_layer import LambdaLayer
 from b_cfn_lambda_layer.package_version import PackageVersion
@@ -107,7 +107,7 @@ layer = LambdaLayer(
     # Or not specify it at all if you care only about dependencies.
     # source_path=None,
     source_path='/path/to/your/layer/source/code',
-    code_runtimes=[Runtime.PYTHON_3_6, Runtime.PYTHON_3_7, Runtime.PYTHON_3_8],
+    code_runtimes=[Runtime.PYTHON_3_8, Runtime.PYTHON_3_9, Runtime.PYTHON_3_10],
     # You can conveniently specify dependencies to include.
     dependencies={
         'python-jose': PackageVersion.from_string_version('3.3.0'),
@@ -122,7 +122,7 @@ Function(
     id='MyFunction',
     code=Code.from_asset('/path/to/lambda/function/code'),
     handler='index.handler',
-    runtime=Runtime.PYTHON_3_6,
+    runtime=Runtime.PYTHON_3_10,
     # Specify layers.
     layers=[layer]
 )

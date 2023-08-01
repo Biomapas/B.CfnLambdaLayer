@@ -1,6 +1,7 @@
+from aws_cdk import Stack
 from aws_cdk.aws_lambda import Runtime, Function, Code
-from aws_cdk.core import Construct, Stack
 from b_aws_testing_framework.tools.cdk_testing.testing_stack import TestingStack
+from constructs import Construct
 
 from b_cfn_lambda_layer.lambda_layer import LambdaLayer
 from b_cfn_lambda_layer_test.integration.infrastructure.layer_cross_stack import root
